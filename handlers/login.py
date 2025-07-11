@@ -1,5 +1,5 @@
 import sqlite3
-
+from handlers.keyboards import main_menu
 import bcrypt
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -53,7 +53,9 @@ async def procces_password(message: Message, state: FSMContext):
             await message.answer("Пользователь с таким email не найден")
             return False
         if bcrypt.checkpw(password.encode(), result[0]):
-            await message.answer("✅ Вход выполнен!")
+            await message.answer("✅ Вход выполнен!", reply_markup=main_menu()  # Вот здесь добавляем клавиатуру
+            )
+
             await state.clear()
             return True
         else:

@@ -1,6 +1,17 @@
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
 
-menu = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='Зарегистрироваться', callback_data='register')],
-    [InlineKeyboardButton(text='Войти', callback_data='login')]
-])
+def login_register_kb():
+    menu = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text='Зарегистрироваться', callback_data='register')],
+        [InlineKeyboardButton(text='Войти', callback_data='login')]
+    ])
+    return  menu
+
+def main_menu():
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="Добавить сервис"), KeyboardButton(text="Все сервисы")],
+            [KeyboardButton(text="Удалить сервис"), KeyboardButton(text="Найти сервис")]
+        ], resize_keyboard=True
+    )
+    return keyboard
