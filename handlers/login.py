@@ -46,7 +46,7 @@ async def procces_password(message: Message, state: FSMContext):
         SELECT password_hash
         FROM users
         WHERE username = ?
-        """, (email))
+        """, (email,))
 
         result = cursor.fetchone()
         if not result:
