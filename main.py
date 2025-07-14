@@ -6,6 +6,7 @@ import os
 from handlers.commands import router as command_router
 from handlers.registration import router as registr_router
 from handlers.login import router as login_router
+from handlers.add_service import router as add_service_router
 from services.databases import init_db
 
 
@@ -17,6 +18,7 @@ async def main():
     dp.include_router(command_router)
     dp.include_router(registr_router)
     dp.include_router(login_router)
+    dp.include_router(add_service_router)
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
