@@ -29,43 +29,52 @@ async def password_callback(message: Message, state: FSMContext):
 
 @router.message(Login.password)
 async def procces_password(message: Message, state: FSMContext):
-    await state.update_data(password=message.text)  # Сначала сохраняем
     user_data = await state.get_data()  # Потом получаем
     email = user_data.get('email')
-    password = user_data.get('password')  # Пароль из состояния
+    password = message.text  # Пароль из состояния
 
     if not email or not password:
         await message.answer("❌ Ошибка в данных. Начните заново.")
+        await state.set_state(Login.email)
         await state.clear()
         return
-    conn = sqlite3.connect('users.db')
-    cursor = conn.cursor()
+
+
 
     try:
-        cursor.execute("""
-        SELECT password_hash
-        FROM users
-        WHERE username = ?
-        """, (email,))
+        with sqlite3.connect('db_manager_password.db') as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users'")
+            if not cursor.fetchone():
+                await message.answer("❌ Системная ошибка. Попробуйте позже.")
+                await state.clear()
+                return
 
-        result = cursor.fetchone()
-        if not result:
-            await message.answer("Пользователь с таким email не найден")
-            return False
-        if bcrypt.checkpw(password.encode(), result[0]):
-            await message.answer("✅ Вход выполнен!\nДобро пожаловать, что хотите сделать!", reply_markup=main_menu()  # Вот здесь добавляем клавиатуру
-            )
+            cursor.execute("""
+            SELECT password_hash
+            FROM users
+            WHERE email = ?
+            """, (email,))
 
-            await state.clear()
-            return True
-        else:
-            await message.answer("❌ Неверные данные")
-            return False
+            result = cursor.fetchone()
+            if not result:
+                await message.answer("Пользователь с таким email не найден")
+                await state.set_state(Login.email)
+                return
+            stored_hash = result[0].encode('utf-8')
+            if bcrypt.checkpw(password.encode('utf-8'), stored_hash):
+                await message.answer("✅ Вход выполнен!\nДобро пожаловать, что хотите сделать!",
+                                     reply_markup=main_menu()  # Вот здесь добавляем клавиатуру
+                )
+            else:
+                await message.answer("❌ Неверные данные")
+                await state.set_state(Login.email)
+
     except sqlite3.Error as e:
         await message.answer(f"⚠ Ошибка базы данных: {e}")
-        return False
+
     except Exception as e:
         await message.answer(f"⚠ Ошибка: {e}")
         return False
     finally:
-        conn.close()
+        await state.clear()

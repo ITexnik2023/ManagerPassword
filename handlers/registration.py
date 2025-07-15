@@ -6,6 +6,7 @@ from services.databases import register_users
 router = Router()
 class Registration(StatesGroup):
     email = State()
+    username = State()
     password = State()
     confirm_password = State()
 
@@ -26,6 +27,29 @@ async def procces_email(message: Message, state: FSMContext):
         await message.answer("❌ Некорректный email. Попробуйте снова:")
         return
     await state.update_data(email=message.text)  # Сохраняем email
+    await state.set_state(Registration.username)  # Переключаем на состояние "username"
+    #проверяем наличие username
+    telegram_username = message.from_user.username
+    if telegram_username:
+        await state.update_data(username=telegram_username)
+        await state.set_state(Registration.password)
+        await message.answer(
+            f"🔒 Мы используем ваш Telegram username: @{telegram_username}\n"
+            "Теперь придумайте пароль (минимум 8 символов):"
+        )
+    else:
+        await state.set_state(Registration.username)
+        await message.answer(
+            "🔒 Мы не нашли username в вашем Telegram профиле.\n"
+            "Пожалуйста, придумайте username:"
+        )
+
+@router.message(Registration.username)
+async def procces_username(message: Message, state: FSMContext):
+    if len(message.text) < 3:
+        await message.answer("❌ Username должен быть не менее 3 символов")
+        return
+    await state.update_data(username=message.text)
     await state.set_state(Registration.password)  # Переключаем на состояние "password"
     await message.answer("🔒 Придумайте пароль:")
 
@@ -49,7 +73,7 @@ async def procces_confirm_password(message: Message, state: FSMContext):
         await message.answer("🔒 Введите пароль еще раз")
         return
 
-    if register_users(user_data['email'], user_data['password']):
+    if register_users(user_data['email'],user_data['username'] ,user_data['password']):
         await message.answer("✅ Регистрация успешно завершена!")
     else:
         await message.answer("❌ Пользователь уже существует")
