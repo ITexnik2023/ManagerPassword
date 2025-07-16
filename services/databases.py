@@ -77,3 +77,16 @@ def services_users(user_id: int, name_service: str, login_service: str, password
         return False
 
 
+def all_services(user_id: int) -> list:
+    try:
+        with closing(sqlite3.connect("db_manager_password.db")) as conn:
+            cursor = conn.cursor()
+            cursor.execute("""SELECT name_service, login_service 
+                FROM services 
+                WHERE user_id = ?
+                ORDER BY name_service
+            """, (user_id,))
+            return cursor.fetchall()
+    except sqlite3.Error as e:
+        print(f"Ошибка: {e}")
+        return []
