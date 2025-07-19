@@ -90,3 +90,15 @@ def all_services(user_id: int) -> list:
     except sqlite3.Error as e:
         print(f"Ошибка: {e}")
         return []
+
+def search_services(user_id: int, service: str) -> list:
+    try:
+        with closing(sqlite3.connect("db_manager_password.db")) as conn:
+            cursor = conn.cursor()
+            cursor.execute("""SELECT name_service, login_service
+             FROM services
+              WHERE name_service LIKE ? AND user_id = ?""",(f"%{service}%", user_id,))
+            return cursor.fetchall()
+    except sqlite3.Error as e:
+        print(f"Ошибка: {e}")
+        return []

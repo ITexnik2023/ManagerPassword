@@ -15,3 +15,11 @@ def main_menu():
         ], resize_keyboard=True
     )
     return keyboard
+
+def back_kb():
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="Назад")]
+        ], resize_keyboard=True
+    )
+    return keyboard

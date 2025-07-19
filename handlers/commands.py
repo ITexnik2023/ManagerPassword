@@ -10,5 +10,5 @@ router = Router()
 async def cmd_start(message: Message):
     await message.answer('Добро пожаловать в менеджер паролей!', reply_markup=login_register_kb())
 
-#@router.message()
+
 
