@@ -102,3 +102,28 @@ def search_services(user_id: int, service: str) -> list:
     except sqlite3.Error as e:
         print(f"Ошибка: {e}")
         return []
+
+
+def delete_service(user_id: int, service: str) -> int:
+    try:
+        with closing(sqlite3.connect("db_manager_password.db")) as conn:
+            cursor = conn.cursor()
+            # Сначала проверим, есть ли такие записи
+            cursor.execute(
+                "SELECT COUNT(*) FROM services WHERE user_id = ? AND name_service LIKE ?",
+                (user_id, f"%{service}%")
+            )
+            count = cursor.fetchone()[0]
+
+            if count > 0:
+                # Если записи есть - удаляем их
+                cursor.execute(
+                    "DELETE FROM services WHERE user_id = ? AND name_service LIKE ?",
+                    (user_id, f"%{service}%")
+                )
+                conn.commit()
+                return count
+            return 0
+    except sqlite3.Error as e:
+        print(f"Ошибка при удалении сервиса: {e}")
+        return 0
