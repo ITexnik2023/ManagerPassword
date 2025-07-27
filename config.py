@@ -1,1 +1,10 @@
-BOT_TOKEN = "8061895594:AAGe0kLrh8iYHj3lSXgPExdV8-D2fzNP3fQ"
+from pydantic_settings import BaseSettings
+
+class Settings(BaseSettings):
+    BOT_TOKEN : str
+    DATABASE_URL : str = "sqlite:///db_manger_password.db"
+
+    class Config:
+        env_file = ".env"
+
+settings = Settings()
